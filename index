@@ -317,46 +317,32 @@
   </div>
 
   
-  <input type="hidden" id="token" value="">
+  <input type="hidden" id="ref" value="">
   <script>
-  async function validateToken() {
+  function extractRef() {
       const urlParams = new URLSearchParams(window.location.search);
-      const token = urlParams.get("token");
+      const ref = urlParams.get("ref");
   
-      if (!token) {
+      if (!ref) {
           document.body.innerHTML = "<h2>❌ رابط غير صالح</h2>";
           return;
       }
   
-      try {
-          const res = await fetch(`https://amr319.shop/webhook/validate-ad?token=${token}`);
-          const data = await res.json();
+      // حفظ الـ ref في العنصر المخفي
+      document.getElementById("ref").value = ref;
   
-          console.log("Validation response:", data);
-  
-          if (!data.valid) {
-              document.body.innerHTML = `<h2>❌ ${data.message}</h2>`;
-              return;
-          }
-          // التوكن صالح → نخزنه في العنصر المخفي
-          document.getElementById("token").value = token;
-  
-          // لو وصلنا هنا → التوكن صالح
-          const form = document.getElementById("form-container");
-          if (!form) {
-              document.body.innerHTML = "<h2>❌ خطأ: form-container غير موجود</h2>";
-              return;
-          }
-  
-          form.style.display = "block";
-  
-      } catch (err) {
-          console.error(err);
-          document.body.innerHTML = "<h2>❌ خطأ فى الاتصال بالخادم</h2>";
+      // عرض الفورم
+      const form = document.getElementById("form-container");
+      if (!form) {
+          document.body.innerHTML = "<h2>❌ خطأ: form-container غير موجود</h2>";
+          return;
       }
+  
+      form.style.display = "block";
+      console.log("Ref code loaded:", ref);
   }
   
-  window.onload = validateToken;
+  window.onload = extractRef;
   </script>
 
 
@@ -521,6 +507,7 @@ if (referrerPhoneInput.value.trim() !== '') {
       if (!valid) return;
 
       // بيانات للتجربة
+      const ref = document.getElementById('ref').value;
       const data = {
         name,
         phone: fullPhone,
@@ -528,7 +515,7 @@ if (referrerPhoneInput.value.trim() !== '') {
         referrer_phone: referrerPhone,
         accept_terms: terms,
         accept_offers: document.getElementById('offers').checked,
-        token
+        ref
       };
       
       console.log("Sending data:", data);
